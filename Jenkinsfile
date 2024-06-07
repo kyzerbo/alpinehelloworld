@@ -52,16 +52,27 @@ pipeline {
           }
      }
 
+        stage('Save artefact') {
+          agent any
+          steps {
+             script {
+               sh '''
+                 docker save ${ID_DOCKER}/$IMAGE_NAME:$IMAGE_TAG > /tmp/alpinehelloworld.tar
+                 
+               '''
+             }
+          }
+     }  
+          
+
      stage ('Login and Push Image on docker hub') {
           agent any
         environment {
-           DOCKERHUB_PASSWORD  = credentials('dockerhub')
+           DOCKERHUB_PASSWORD  = credentials('dockerhub_zerbo')
         }            
           steps {
              script {
                sh '''
-                   git ' https://github.com/kyzerbo/alpinehelloworld.git'
-                   sh 'docker build -t ${ID_DOCKER}/$IMAGE_NAME:$IMAGE_TAG .'
                    echo $DOCKERHUB_PASSWORD_PSW | docker login -u $ID_DOCKER --password-stdin
                    docker push ${ID_DOCKER}/$IMAGE_NAME:$IMAGE_TAG
                '''
